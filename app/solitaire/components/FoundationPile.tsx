@@ -2,7 +2,7 @@ import React, { useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { canMoveToFoundation, CardType } from "../logic";
 import { GameCard } from "./GameCard";
-import { useDrop, ConnectDropTarget } from "react-dnd";
+import { useDrop } from "react-dnd";
 
 interface FoundationPileProps {
   cards: CardType[];
