@@ -1,28 +1,60 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { CardType } from "../logic";
+import { canMoveToFoundation, CardType } from "../logic";
 import { GameCard } from "./GameCard";
+import { useDrop } from "react-dnd";
+import { DropTargetMonitor } from "react-dnd";
 
 interface FoundationPileProps {
   cards: CardType[];
   suit: string;
-  onCardClick: () => void;
+  pileIndex: number;
+  onCardMove: (fromPile: number, toPile: number, cardIndex: number) => void;
 }
 
-export function FoundationPile({ cards, suit, onCardClick }: FoundationPileProps) {
+export function FoundationPile({
+  cards,
+  suit,
+  pileIndex,
+  onCardMove,
+}: FoundationPileProps) {
   const topCard = cards[cards.length - 1];
 
+  const [{ isOver, canDrop }, drop] = useDrop(() => ({
+    accept: "card",
+    drop: (item: { card: CardType; index: number; pileIndex: number }) => {
+      onCardMove(item.pileIndex, pileIndex, item.index);
+    },
+    canDrop: (item: { card: CardType }) => {
+      return canMoveToFoundation(item.card, cards);
+    },
+    collect: (monitor: DropTargetMonitor) => ({
+      isOver: !!monitor.isOver(),
+      canDrop: !!monitor.canDrop(),
+    }),
+  }), [cards, pileIndex, onCardMove]);
+
   return (
-    <Card
-      className="w-[100px] h-[150px] bg-green-600 border-2 border-white cursor-pointer"
-      onClick={onCardClick}
+    <div
+      ref={drop}
+      className={`relative ${isOver && canDrop ? "ring-2 ring-blue-500" : ""}`}
     >
-      <CardContent className="p-2 flex items-center justify-center">
-        {topCard ? (
-          <GameCard card={topCard} />
-        ) : (
-          <div className="text-white text-4xl font-bold">{suit}</div>
-        )}
-      </CardContent>
-    </Card>
+      <Card
+        className={`w-[100px] h-[150px] ${
+          topCard ? "bg-white" : "bg-green-600"
+        } border-2 border-white cursor-pointer`}
+      >
+        <CardContent className="p-2 flex items-center justify-center">
+          {topCard ? (
+            <GameCard
+              card={topCard}
+              index={cards.length - 1}
+              pileIndex={pileIndex}
+            />
+          ) : (
+            <div className="text-white text-4xl font-bold">{suit}</div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 }

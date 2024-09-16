@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { RefreshCcw, RotateCcw } from "lucide-react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import { CardType, createDeck, shuffleDeck, canMoveToFoundation, canMoveToTableau } from "./logic";
+import { CardType, createDeck, shuffleDeck, canMoveToFoundation, canMoveToTableau, suits } from "./logic";
 import { GameCard } from "./components/GameCard";
 import { TableauPile } from "./components/TableauPile";
 import { FoundationPile } from "./components/FoundationPile";
@@ -50,22 +50,22 @@ export default function Solitaire() {
   }
 
   function moveCard(fromPileIndex: number, toPileIndex: number, cardIndex: number) {
-    let fromPile, setFromPile, toPile, setToPile;
+    let fromPile: CardType[], setFromPile: (newPile: CardType[]) => void, toPile: CardType[], setToPile: (newPile: CardType[]) => void;
 
     console.log("Moving card:", { fromPileIndex, toPileIndex, cardIndex });
 
     if (fromPileIndex === -1) {
-      fromPile = wastePile;
+      fromPile = [...wastePile];
       setFromPile = setWastePile;
     } else if (fromPileIndex < 7) {
-      fromPile = tableauPiles[fromPileIndex];
+      fromPile = [...tableauPiles[fromPileIndex]];
       setFromPile = (newPile: CardType[]) => {
         const newTableauPiles = [...tableauPiles];
         newTableauPiles[fromPileIndex] = newPile;
         setTableauPiles(newTableauPiles);
       };
     } else {
-      fromPile = foundationPiles[fromPileIndex - 7];
+      fromPile = [...foundationPiles[fromPileIndex - 7]];
       setFromPile = (newPile: CardType[]) => {
         const newFoundationPiles = [...foundationPiles];
         newFoundationPiles[fromPileIndex - 7] = newPile;
@@ -74,14 +74,14 @@ export default function Solitaire() {
     }
 
     if (toPileIndex < 7) {
-      toPile = tableauPiles[toPileIndex];
+      toPile = [...tableauPiles[toPileIndex]];
       setToPile = (newPile: CardType[]) => {
         const newTableauPiles = [...tableauPiles];
         newTableauPiles[toPileIndex] = newPile;
         setTableauPiles(newTableauPiles);
       };
     } else {
-      toPile = foundationPiles[toPileIndex - 7];
+      toPile = [...foundationPiles[toPileIndex - 7]];
       setToPile = (newPile: CardType[]) => {
         const newFoundationPiles = [...foundationPiles];
         newFoundationPiles[toPileIndex - 7] = newPile;
@@ -101,11 +101,7 @@ export default function Solitaire() {
     if (toPileIndex < 7 && canMoveToTableau(movingCards[0], toPile)) {
       setFromPile([...fromPile.slice(0, cardIndex)]);
       setToPile([...toPile, ...movingCards]);
-    } else if (
-      toPileIndex >= 7 &&
-      movingCards.length === 1 &&
-      canMoveToFoundation(movingCards[0], toPile)
-    ) {
+    } else if (toPileIndex >= 7 && movingCards.length === 1 && canMoveToFoundation(movingCards[0], toPile)) {
       setFromPile([...fromPile.slice(0, cardIndex)]);
       setToPile([...toPile, movingCards[0]]);
     } else {
@@ -114,13 +110,39 @@ export default function Solitaire() {
     }
 
     // Flip the top card of the from pile if it's face down
-    if (fromPileIndex < 7 && cardIndex > 0 && !fromPile[cardIndex - 1].faceUp) {
+    if (fromPileIndex < 7 && cardIndex > 0 && fromPile[cardIndex - 1] && !fromPile[cardIndex - 1].faceUp) {
       const newFromPile = [...fromPile.slice(0, cardIndex)];
       newFromPile[cardIndex - 1] = {
         ...newFromPile[cardIndex - 1],
         faceUp: true,
       };
       setFromPile(newFromPile);
+    }
+  }
+
+  function handleDoubleClick(card: CardType, fromPileIndex: number, cardIndex: number) {
+    // Check if it's an ace and can be moved to a foundation pile
+    if (card.value === 'A') {
+      const foundationIndex = suits.indexOf(card.suit);
+      if (foundationPiles[foundationIndex].length === 0) {
+        moveCard(fromPileIndex, foundationIndex + 7, cardIndex);
+        return;
+      }
+    }
+
+    // Check if it can be moved to a foundation pile
+    const foundationIndex = suits.indexOf(card.suit);
+    if (canMoveToFoundation(card, foundationPiles[foundationIndex])) {
+      moveCard(fromPileIndex, foundationIndex + 7, cardIndex);
+      return;
+    }
+
+    // Check if it can be moved to a tableau pile
+    for (let i = 0; i < 7; i++) {
+      if (i !== fromPileIndex && canMoveToTableau(card, tableauPiles[i])) {
+        moveCard(fromPileIndex, i, cardIndex);
+        return;
+      }
     }
   }
 
@@ -142,15 +164,16 @@ export default function Solitaire() {
         </header>
 
         <div className="flex gap-4 mb-4">
-          <GameCard card={{ suit: '♠', value: '', faceUp: false }} onClick={drawCard} />
-          <GameCard card={wastePile[0] || { suit: '♠', value: '', faceUp: false }} />
+          <GameCard card={{ suit: '♠', value: '', faceUp: false }} index={-1} pileIndex={-2} onClick={drawCard} />
+          <GameCard card={wastePile[0] || { suit: '♠', value: '', faceUp: false }} index={0} pileIndex={-1} />
           <div className="flex-grow" />
           {foundationPiles.map((pile, index) => (
             <FoundationPile
               key={index}
               cards={pile}
               suit={['♠', '♥', '♦', '♣'][index]}
-              onCardClick={() => {/* Implement foundation pile click logic */}}
+              pileIndex={index + 7}
+              onCardMove={moveCard}
             />
           ))}
         </div>
@@ -160,7 +183,9 @@ export default function Solitaire() {
             <TableauPile
               key={index}
               cards={pile}
-              onCardClick={(cardIndex) => {/* Implement tableau pile click logic */}}
+              pileIndex={index}
+              onCardMove={moveCard}
+              onDoubleClick={handleDoubleClick}
             />
           ))}
         </div>
