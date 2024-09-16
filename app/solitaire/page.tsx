@@ -16,14 +16,14 @@ export default function Solitaire() {
   const [stockPile, setStockPile] = useState<CardType[]>([]);
   const [wastePile, setWastePile] = useState<CardType[]>([]);
 
-  useEffect(() => {
-    startNewGame();
-  }, [startNewGame]);
-
   const startNewGame = useCallback(() => {
     const newDeck = shuffleDeck(createDeck());
     dealCards(newDeck);
   }, []);
+
+  useEffect(() => {
+    startNewGame();
+  }, [startNewGame]);
 
   function dealCards(deck: CardType[]) {
     const newTableauPiles: CardType[][] = Array(7).fill([]).map(() => []);
