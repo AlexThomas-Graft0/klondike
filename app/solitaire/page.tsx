@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { RefreshCcw, RotateCcw } from "lucide-react";
 import { DndProvider } from "react-dnd";
@@ -18,12 +18,12 @@ export default function Solitaire() {
 
   useEffect(() => {
     startNewGame();
-  }, []);
+  }, [startNewGame]);
 
-  function startNewGame() {
+  const startNewGame = useCallback(() => {
     const newDeck = shuffleDeck(createDeck());
     dealCards(newDeck);
-  }
+  }, []);
 
   function dealCards(deck: CardType[]) {
     const newTableauPiles: CardType[][] = Array(7).fill([]).map(() => []);

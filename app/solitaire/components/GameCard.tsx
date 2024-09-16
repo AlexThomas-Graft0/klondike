@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { CardType } from "../logic";
 import { useDrag } from 'react-dnd';
+import Image from 'next/image';
 import cardBackImage from '@/public/cardback.png';
 
 interface GameCardProps {
@@ -36,7 +37,7 @@ export function GameCard({ card, index, pileIndex, onClick, onDoubleClick }: Gam
               {value}{suit}
             </span>
           ) : (
-            <img src={cardBackImage.src} alt="Card back" className="w-full h-full object-cover rounded-lg" />
+            <Image src={cardBackImage.src} alt="Card back" width={100} height={150} className="object-cover rounded-lg" />
           )}
         </CardContent>
       </Card>

@@ -1,8 +1,8 @@
+import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { canMoveToFoundation, CardType } from "../logic";
 import { GameCard } from "./GameCard";
 import { useDrop } from "react-dnd";
-import { DropTargetMonitor } from "react-dnd";
 
 interface FoundationPileProps {
   cards: CardType[];
