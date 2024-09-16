@@ -1,8 +1,8 @@
-import React from "react";
+import React, { useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { canMoveToFoundation, CardType } from "../logic";
 import { GameCard } from "./GameCard";
-import { useDrop } from "react-dnd";
+import { useDrop, ConnectDropTarget } from "react-dnd";
 
 interface FoundationPileProps {
   cards: CardType[];
@@ -24,6 +24,7 @@ export function FoundationPile({
   onCardMove,
 }: FoundationPileProps) {
   const topCard = cards[cards.length - 1];
+  const ref = useRef<HTMLDivElement>(null);
 
   const [{ isOver, canDrop }, drop] = useDrop<DragItem, void, { isOver: boolean; canDrop: boolean }>(() => ({
     accept: "card",
@@ -39,9 +40,11 @@ export function FoundationPile({
     }),
   }), [cards, pileIndex, onCardMove]);
 
+  drop(ref);
+
   return (
     <div
-      ref={drop}
+      ref={ref}
       className={`relative ${isOver && canDrop ? "ring-2 ring-blue-500" : ""}`}
     >
       <Card

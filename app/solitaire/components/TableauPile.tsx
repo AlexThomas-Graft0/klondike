@@ -1,3 +1,4 @@
+import React, { useRef } from "react";
 import { CardType, canMoveToTableau } from "../logic";
 import { GameCard } from "./GameCard";
 import { useDrop } from 'react-dnd';
@@ -16,6 +17,8 @@ interface DragItem {
 }
 
 export function TableauPile({ cards, pileIndex, onCardMove, onDoubleClick }: TableauPileProps) {
+  const ref = useRef<HTMLDivElement>(null);
+
   const [, drop] = useDrop<DragItem, void, unknown>(() => ({
     accept: 'card',
     drop: (item) => {
@@ -26,8 +29,10 @@ export function TableauPile({ cards, pileIndex, onCardMove, onDoubleClick }: Tab
     },
   }), [cards, pileIndex, onCardMove]);
 
+  drop(ref);
+
   return (
-    <div ref={drop} className="flex flex-col items-center">
+    <div ref={ref} className="flex flex-col items-center">
       {cards.map((card, index) => (
         <div key={index} className="-mt-20 first:mt-0" style={{ zIndex: index }}>
           <GameCard

@@ -1,3 +1,4 @@
+import React, { useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { CardType } from "../logic";
 import { useDrag } from 'react-dnd';
@@ -15,6 +16,7 @@ interface GameCardProps {
 export function GameCard({ card, index, pileIndex, onClick, onDoubleClick }: GameCardProps) {
   const { suit, value, faceUp } = card;
   const isRed = suit === '♥' || suit === '♦';
+  const ref = useRef<HTMLDivElement>(null);
 
   const [{ isDragging }, drag] = useDrag(() => ({
     type: 'card',
@@ -24,8 +26,10 @@ export function GameCard({ card, index, pileIndex, onClick, onDoubleClick }: Gam
     }),
   }), [card, index, pileIndex]);
 
+  drag(ref);
+
   return (
-    <div ref={drag} style={{ opacity: isDragging ? 0.5 : 1 }}>
+    <div ref={ref} style={{ opacity: isDragging ? 0.5 : 1 }}>
       <Card
         className={`w-[100px] h-[150px] ${faceUp ? 'bg-white' : 'bg-green-700'} border-2 border-white cursor-pointer`}
         onClick={onClick}
