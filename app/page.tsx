@@ -5,10 +5,10 @@ import { Button } from "@/components/ui/button";
 import { RefreshCcw, RotateCcw } from "lucide-react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import { CardType, createDeck, shuffleDeck, canMoveToFoundation, canMoveToTableau, suits } from "./logic";
-import { GameCard } from "./components/GameCard";
-import { TableauPile } from "./components/TableauPile";
-import { FoundationPile } from "./components/FoundationPile";
+import { CardType, createDeck, shuffleDeck, canMoveToFoundation, canMoveToTableau, suits } from "./solitaire/logic";
+import { GameCard } from "./solitaire/components/GameCard";
+import { TableauPile } from "./solitaire/components/TableauPile";
+import { FoundationPile } from "./solitaire/components/FoundationPile";
 
 export default function Home() {
   const [tableauPiles, setTableauPiles] = useState<CardType[][]>(Array(7).fill([]));
