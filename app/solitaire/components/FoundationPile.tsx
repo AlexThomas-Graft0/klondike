@@ -11,6 +11,12 @@ interface FoundationPileProps {
   onCardMove: (fromPile: number, toPile: number, cardIndex: number) => void;
 }
 
+interface DragItem {
+  card: CardType;
+  index: number;
+  pileIndex: number;
+}
+
 export function FoundationPile({
   cards,
   suit,
@@ -19,15 +25,15 @@ export function FoundationPile({
 }: FoundationPileProps) {
   const topCard = cards[cards.length - 1];
 
-  const [{ isOver, canDrop }, drop] = useDrop(() => ({
+  const [{ isOver, canDrop }, drop] = useDrop<DragItem, void, { isOver: boolean; canDrop: boolean }>(() => ({
     accept: "card",
-    drop: (item: { card: CardType; index: number; pileIndex: number }) => {
+    drop: (item) => {
       onCardMove(item.pileIndex, pileIndex, item.index);
     },
-    canDrop: (item: { card: CardType }) => {
+    canDrop: (item) => {
       return canMoveToFoundation(item.card, cards);
     },
-    collect: (monitor: DropTargetMonitor) => ({
+    collect: (monitor) => ({
       isOver: !!monitor.isOver(),
       canDrop: !!monitor.canDrop(),
     }),

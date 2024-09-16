@@ -94,15 +94,15 @@ export default function Solitaire() {
       return;
     }
 
-    const movingCards = fromPile.slice(cardIndex);
+    const movingCards = fromPileIndex === -1 ? [fromPile[cardIndex]] : fromPile.slice(cardIndex);
     console.log("Moving cards:", movingCards);
     console.log("To pile:", toPile);
 
     if (toPileIndex < 7 && canMoveToTableau(movingCards[0], toPile)) {
-      setFromPile([...fromPile.slice(0, cardIndex)]);
+      setFromPile(fromPileIndex === -1 ? fromPile.filter((_, i) => i !== cardIndex) : fromPile.slice(0, cardIndex));
       setToPile([...toPile, ...movingCards]);
     } else if (toPileIndex >= 7 && movingCards.length === 1 && canMoveToFoundation(movingCards[0], toPile)) {
-      setFromPile([...fromPile.slice(0, cardIndex)]);
+      setFromPile(fromPileIndex === -1 ? fromPile.filter((_, i) => i !== cardIndex) : fromPile.slice(0, cardIndex));
       setToPile([...toPile, movingCards[0]]);
     } else {
       console.log("Invalid move");

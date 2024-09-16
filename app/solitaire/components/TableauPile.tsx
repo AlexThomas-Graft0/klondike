@@ -9,13 +9,19 @@ interface TableauPileProps {
   onDoubleClick: (card: CardType, pileIndex: number, cardIndex: number) => void;
 }
 
+interface DragItem {
+  card: CardType;
+  index: number;
+  pileIndex: number;
+}
+
 export function TableauPile({ cards, pileIndex, onCardMove, onDoubleClick }: TableauPileProps) {
-  const [, drop] = useDrop(() => ({
+  const [, drop] = useDrop<DragItem, void, unknown>(() => ({
     accept: 'card',
-    drop: (item: { card: CardType; index: number; pileIndex: number }) => {
+    drop: (item) => {
       onCardMove(item.pileIndex, pileIndex, item.index);
     },
-    canDrop: (item: { card: CardType }) => {
+    canDrop: (item) => {
       return canMoveToTableau(item.card, cards);
     },
   }), [cards, pileIndex, onCardMove]);
